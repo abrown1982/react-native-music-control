@@ -55,7 +55,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
     private boolean isPlaying = false;
     private long controls = 0;
     protected int ratingType = RatingCompat.RATING_PERCENTAGE;
-    
+
     public NotificationClose notificationClose = NotificationClose.PAUSED;
 
     public MusicControlModule(ReactApplicationContext context) {
@@ -153,10 +153,13 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         init = true;
     }
 
-    synchronized public void destroy() {
-        if(!init) return;
+    @ReactMethod
+    public void stopControl() {
+        if (!init)
+            return;
 
-        if (notification != null) notification.hide();
+        if (notification != null)
+            notification.hide();
         session.release();
 
         ReactApplicationContext context = getReactApplicationContext();
@@ -169,6 +172,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         am.abandonAudioFocus(afChangeListener);
 
         if(artworkThread != null && artworkThread.isAlive()) artworkThread.interrupt();
+
         artworkThread = null;
 
         session = null;
@@ -182,6 +186,10 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         nb = null;
 
         init = false;
+    }
+
+    synchronized public void destroy() {
+        stopControl();
     }
 
     @ReactMethod
@@ -236,7 +244,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
         nb.setContentText(artist);
         nb.setContentInfo(album);
         nb.setColor(notificationColor);
-        
+
         notification.setCustomNotificationIcon(notificationIcon);
 
         if(metadata.hasKey("artwork")) {
@@ -257,7 +265,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
                 @Override
                 public void run() {
                     Bitmap bitmap = loadArtwork(artworkUrl, artworkLocal);
-                    
+
                     if(md != null) {
                         md.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, bitmap);
                         session.setMetadata(md.build());
@@ -266,7 +274,7 @@ public class MusicControlModule extends ReactContextBaseJavaModule implements Co
                         nb.setLargeIcon(bitmap);
                         notification.show(nb, isPlaying);
                     }
-                    
+
                     artworkThread = null;
                 }
             });
